@@ -10,8 +10,8 @@
 #define ADC_Pin54     4
 #define ADC_Pin55     5
 
-void adc_init(void);
+void adc_init(u8 adc_pin);
 
-int adc_read(u8 adc_pin, u16 *adc_value);
+int adc_read();
 
 #endif // __ADC_H__

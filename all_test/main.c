@@ -20,6 +20,7 @@
 #include "lib/pwm.h"
 #include "lib/i2c.h"
 #include "lib/os.h"
+#include "lib/adc.h"
 
 void i2c_task(void);
 void led_blink(void);
@@ -45,6 +46,13 @@ void led_blink(void)
 	gpio_toggle(P54);
 }
 
+void adc_task(void)
+{
+	int adc_value;
+	adc_value = adc_read();
+	print("ADC: %d\r\n", adc_value);
+}
+
 void system_init(void)
 {
 	gpio_init_allpin(3, GPIO_OUT_PP);
@@ -54,14 +62,16 @@ void system_init(void)
 	i2c_slave_init(I2C_P33_P32, 0x50, 0);
 	uart1_init();
 
-	os_timer0_init();
-	add_task(1, 3, 10, i2c_task);
-	add_task(1, 0, 500, led_blink);
+	gpio_init(5, 5, GPIO_HighZ);			// ADC
+	adc_init(ADC_Pin55);
 
+	os_timer0_init();
+	add_task(0, 0, 10, i2c_task);
+	add_task(0, 1, 10, adc_task);
+	add_task(0, 3, 500, led_blink);
+	
 	delay_ms(1000);
 	print("Hello World!\r\n");
-	
-	gpio_set(P54, Pin_High);
 }
 
 

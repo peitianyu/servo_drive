@@ -1,7 +1,7 @@
 #include "adc.h"
 
 
-void adc_init(void)
+void adc_init(u8 adc_pin)
 {
     P_SW2 |= 0x80;
     ADCTIM = 0x3f;                              //设置ADC内部时序
@@ -9,30 +9,23 @@ void adc_init(void)
 
     ADCCFG = 0x2f;                              //设置ADC时钟为系统时钟/2/16
     ADC_CONTR = 0x80;                           //打开ADC电源
-}
-
-static int adc_read_once(u8 adc_pin, u16 *adc_value)
-{
-    int res;
-    
     ADC_CONTR |= adc_pin;                       //选择ADC通道
     ADC_CONTR |= 0x40;                          //启动AD转换
-    _nop_();
-    _nop_();
-    while (!(ADC_CONTR & 0x20));                //查询ADC完成标志
-    ADC_CONTR &= ~0x20;                         //清完成标志
-    res = (ADC_RES << 8) | ADC_RESL;            //读取ADC结果
+}
 
+static u16 g_adc_value = 0;
+u16 adc_read()
+{
+    u8 i;
+    u16 res = 0;
+    for(i=0; i<8; i++) { res += g_adc_value; }
+    res >>= 3;
     return res;
 }
 
-int adc_read(u8 adc_pin, u16 *adc_value)
+void adc_irq(void) interrupt 5
 {
-    u8 i;
-    int res = 0;
-    for(i=0; i<8; i++){
-        res += adc_read_once(adc_pin, adc_value);
-    }
-    res >>= 3;
-    return res;
+    ADC_CONTR &= ~0x20;                         //清中断标志
+    g_adc_value = (ADC_RES << 8) | ADC_RESL;    //读取ADC结果
+    ADC_CONTR |= 0x40;                          //继续AD转换
 }
