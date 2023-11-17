@@ -6,7 +6,7 @@
 #define		I2C_Master()	I2CCFG |=  0x40		/* 1: 设为主机	*/
 #define		I2C_Slave()		I2CCFG &= ~0x40		/* 0: 设为从机	*/
 
-#define		I2C_WDTA_EN()		I2CMSAUX |= 0x01		/* 使能自动发送 */
+#define		I2C_WDTA_EN()	I2CMSAUX |= 0x01		/* 使能自动发送 */
 #define		I2C_WDTA_DIS()	I2CMSAUX &= ~0x01		/* 禁止自动发送 */
 
 #define		I2C_Address(n)	I2CSLADR = (I2CSLADR & 0x01) | (n << 1)	/* 从机地址 */
@@ -15,6 +15,7 @@
 
 void i2c_master_init(u8 sw_io, u16 speed, u8 wtda)
 {
+    P_SW2 |= 0x80;
     P_SW2 |= sw_io;
     I2C_DISABLE();
     I2C_Master();
@@ -27,6 +28,7 @@ void i2c_master_init(u8 sw_io, u16 speed, u8 wtda)
 
 void i2c_slave_init(u8 sw_io, u8 addr, u8 match)
 {
+    P_SW2 |= 0x80;
     P_SW2 |= sw_io;
     I2C_DISABLE();
     I2C_Slave();
