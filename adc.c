@@ -1,6 +1,5 @@
 #include "adc.h"
 
-
 void adc_init()
 {
     P_SW2 |= 0x80;

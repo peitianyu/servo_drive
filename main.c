@@ -21,7 +21,7 @@ void main()
 	gpio_init(3, 3, GPIO_PullUp);
 	gpio_init(5, 5, GPIO_HighZ);
 	
-	timer0_init(50000);  // 50kHz
+	timer_init(0, 50000); // 50kHz
     uart1_init();
 	
 	adc_init();
@@ -32,6 +32,6 @@ void main()
     {
         delay_ms(1000);
 		
-        print("adc : %d\r\n", adc_get(ADC_Pin55));
+        print("adc : %d\r\n", adc_get(5));
     }
 }
