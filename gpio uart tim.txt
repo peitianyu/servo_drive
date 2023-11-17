@@ -1,0 +1,31 @@
+/*
+gpio 	ok
+uart 	ok
+timer 	ok
+pwm		no
+adc		no
+i2c		no
+*/
+
+#include "gpio.h"
+#include "delay.h"
+//#include "timer.h"
+//#include "uart.h"
+
+void main()
+{
+	gpio_init(3, 3, GPIO_OUT_PP);
+	gpio_init(3, 2, GPIO_OUT_PP);
+	gpio_init(5, 4, GPIO_OUT_PP);
+	//timer0_init(50000); // 50kHz
+	//timer1_init(40000); // 40kHz
+	//uart1_init();
+	
+	//EA  = 1;                              
+	
+	while(TRUE)
+	{
+		//print("-------stc8g-------");
+		delay_ms(500);
+	}
+}
