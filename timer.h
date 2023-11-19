@@ -8,11 +8,11 @@
 // timer_id: 0, 1
 #define timer_init(id, hz)                  					do      	\
 {                                                                           \
-	AUXR |= 1 << (8 - id);  			                                    \
-	if(id == 0)		TMOD = 0x00;                                            \
-	else if(id == 1)	TMOD &= 0x0F;	                                    \
+	if(id == 0)			AUXR |= 0x80, TMOD &= 0xF0;                         \
+	else if(id == 1)	AUXR |= 0x40, TMOD &= 0x0F;	                        \
 	TL##id = TLOAD(hz);	   			                                        \
 	TH##id = TLOAD(hz) >> 8;	   		                                    \
+	TF##id = 0;																\
 	TR##id = 1;       				                                        \
 	ET##id = 1;       				                                        \
 	EA = 1;  							                                    \

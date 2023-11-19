@@ -3,7 +3,10 @@
 
 #include "config.h"
 
-// id : p32(0) p33(1) p54(2)
+/*
+* tim0 : 20us*1024 = 20.48ms
+* id : p32(0) p33(1) p54(2)
+*/ 
 #define pwm_10bit_init(id, pwm_val)     do              \
 {                                                       \
     CCON = 0x00;                                        \
@@ -19,7 +22,7 @@
     CR = 1;                                             \								
 } while(0)  
 
-#define pwm_set(id, pwm_val)    do                      \
+#define pwm_set(id, pwm_val)            do              \
 {                                                       \
     PCA_PWM##id |= ((pwm_val >> 8) << 4);               \
     CCAP##id##H = (u8)pwm_val;                          \

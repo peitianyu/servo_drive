@@ -14,24 +14,40 @@
 #include "timer.h"
 #include "uart.h"
 #include "adc.h"
+#include "os.h"
 
+void led_task(void)
+{
+	gpio_toggle(P54);
+}
+
+void print_adc(void)
+{
+	u16 adc_val = adc_get(5);
+	print("adc_val: %d\r\n", adc_val);
+}
+
+u16 pwm_val = 0.02 * 1024;
 void main()
 {
 	gpio_init(3, 2, GPIO_PullUp);
 	gpio_init(3, 3, GPIO_PullUp);
 	gpio_init(5, 5, GPIO_HighZ);
+	gpio_init(5, 4, GPIO_PullUp);
+
 	
 	timer_init(0, 50000); // 50kHz
-    uart1_init();
-	
+	uart1_init();
+    
 	adc_init();
 
-	pwm_10bit_init(0, 20);
+	pwm_10bit_init(0, pwm_val); // 选择定时器0溢出为pwm发生源
+
+	add_task(0, 0, 1000, led_task);
+	add_task(1, 100, 1000, print_adc);
     
 	while(TRUE)
     {
-        delay_ms(1000);
-		
-        print("adc : %d\r\n", adc_get(5));
+		task_process();
     }
 }

@@ -8,7 +8,7 @@
 	u8 ms = time;																\
     u16 i;                                                                      \
     do {                                                                        \
-        i = MAIN_Fosc / 10000;                                                  \
+        i = MAIN_Fosc / 9000;                                                   \
         while (--i);                                                            \
     } while (--ms);                                                             \
 } while(0)

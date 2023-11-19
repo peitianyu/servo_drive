@@ -10,6 +10,7 @@ typedef struct{
 
 static TASK_InfoType g_task_info[TASKS_MAX] = {0};  /*!< 任务信息数组 */
 
+static u8 g_task_num = 0;                   /*!< 任务数量 */
 void add_task(u8 id, u16 timer, u16 itv_time, void (*task_hook)(void))
 {
     if(id > TASKS_MAX)
@@ -20,50 +21,40 @@ void add_task(u8 id, u16 timer, u16 itv_time, void (*task_hook)(void))
     g_task_info[id].m_timer = timer;
     g_task_info[id].m_itv_time = itv_time;
     g_task_info[id].m_task_hook = task_hook;
+
+    g_task_num++;
 }
 
 void task_remark(void)
 {
-	u8 i = TASKS_MAX;
+	u8 i = g_task_num;
     while(i--)
     {
-        if(g_task_info[i].m_timer){
-            g_task_info[i].m_timer--;
-
-            if(g_task_info[i].m_timer == 0){
-                g_task_info[i].m_timer = g_task_info[i].m_itv_time; 
-                g_task_info[i].m_run = 1;
-            }
+        if(g_task_info[i].m_timer-- == 0){
+            g_task_info[i].m_timer = g_task_info[i].m_itv_time; 
+            g_task_info[i].m_run = 1;
         }
     }
 }
 
 void task_process(void)
 { 
-    u8 i = TASKS_MAX;
+    u8 i = g_task_num;
     while(i--)
     {
         if (!g_task_info[i].m_run) continue;
 
-        print("task %d run \r\n", i);
         g_task_info[i].m_task_hook();           // 运行任务
         g_task_info[i].m_run = 0;               // 标志清0
     }   
 }
 
-
-void os_timer0_init(void)    //100us@24MHz
-{
-	AUXR |= 0x80;  // 定时器0 1T模式
-    TMOD = 0x00;   // 定时器模式0 16位自动重载模式
-    TL0 = 0xA0;	   // 设置定时初始值
-	TH0 = 0xF6;	   // 设置定时初始值
-    TR0 = 1;       // 定时器开始计时
-    ET0 = 1;       // 使能定时器1中断
-    EA  = 1;       // 打开总中断
-}
-
+// 1ms = 20us * 50
 void os_irq() interrupt 1
 {
-    task_remark();
+    static u8 s_cnt = 0;
+    if(++s_cnt >= 50){
+        s_cnt = 0;
+        task_remark();
+    }
 }
