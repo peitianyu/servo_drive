@@ -51,3 +51,60 @@ void main()
 		task_process();
     }
 }
+
+/*
+#include "gpio.h"
+#include "delay.h"
+#include "uart.h"
+
+#if 0
+#include "i2c_master.h"
+
+u8 table[5] = {0x00, 0x23, 0x45, 0x67, 0x32};
+u8 p[10];
+u8 cnt = 0;
+void main()
+{
+	gpio_init(3, 2, GPIO_OUT_OD);
+	gpio_init(3, 3, GPIO_OUT_OD);
+
+    i2c_master_init(I2C_P33_P32);
+	uart1_init();
+	
+    while (1)
+	{                                 
+		table[0] = cnt++;
+
+        i2c_master_send_datas(0x5a, 0x00, table, 5);
+		
+		delay_ms(1000); 							//发送停止命令
+		
+		i2c_master_recv(0x5a, 0x00, p, 5);
+		uart1_send_array(p, 5);
+    }
+}
+
+#else
+
+#include "i2c_slave.h"
+
+void main()
+{
+    gpio_init(3, 2, GPIO_PullUp);
+	gpio_init(3, 3, GPIO_PullUp);
+	
+	i2c_slave_init(I2C_P33_P32, 0x5a);
+	
+	uart1_init();
+
+    while(1)
+    {
+        delay_ms(1500);
+        uart1_send_array(i2c_slave_get(), 5);
+
+        i2c_slave_set(i2c_slave_get(), 5);
+    }
+}
+
+#endif 
+*/
