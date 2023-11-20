@@ -13,6 +13,9 @@ void uart1_init(void)	//115200bps@24.000MHz
 	TH1 = 0xFF;			//设置定时初始值
 	ET1 = 0;			//禁止定时器中断
 	TR1 = 1;			//定时器1开始计时
+    ES = 1;             //使能串口中断
+	
+	EA = 1;
 }
 
 static void uart1_send_byte(u8 dat)
@@ -22,7 +25,7 @@ static void uart1_send_byte(u8 dat)
     TI = 0;
 }
 
-static void uart1_send_array(u8 *p, u8 len)
+void uart1_send_array(u8 *p, u8 len)
 {
     while(len--) {
         uart1_send_byte(*p++);
@@ -38,3 +41,21 @@ void print(char *p, ...)
     va_end(ap);
     uart1_send_array(buf, strlen(buf));
 }
+
+static u8 g_rptr[16];
+static u8 g_cnt = 0;
+void uart_isr() interrupt 4
+{
+    if(RI) {
+        RI = 0;
+
+        if(SBUF == 0xff) {
+            g_cnt = 0;
+            return;
+        }
+
+        g_rptr[g_cnt++] = SBUF;
+    }
+}
+
+u8* uart1_get() { return g_rptr; }

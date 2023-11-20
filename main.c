@@ -24,7 +24,7 @@ void led_task(void)
 void print_adc(void)
 {
 	u16 adc_val = adc_get(5);
-	print("adc_val: %d\r\n", adc_val);
+	print("%d\r\n", adc_val);
 }
 
 u16 pwm_val = 0.02 * 1024;
@@ -35,7 +35,6 @@ void main()
 	gpio_init(5, 5, GPIO_HighZ);
 	gpio_init(5, 4, GPIO_PullUp);
 
-	
 	timer_init(0, 50000); // 50kHz
 	uart1_init();
     
@@ -44,7 +43,7 @@ void main()
 	pwm_10bit_init(0, pwm_val); // 选择定时器0溢出为pwm发生源
 
 	add_task(0, 0, 1000, led_task);
-	add_task(1, 100, 1000, print_adc);
+	add_task(1, 0, 1, print_adc);
     
 	while(TRUE)
     {
@@ -52,16 +51,18 @@ void main()
     }
 }
 
+
 /*
+
 #include "gpio.h"
 #include "delay.h"
 #include "uart.h"
+#include "config.h"
 
-#if 0
+#if 1
 #include "i2c_master.h"
 
-u8 table[5] = {0x00, 0x23, 0x45, 0x67, 0x32};
-u8 p[10];
+u8 p[5];
 u8 cnt = 0;
 void main()
 {
@@ -73,9 +74,7 @@ void main()
 	
     while (1)
 	{                                 
-		table[0] = cnt++;
-
-        i2c_master_send_datas(0x5a, 0x00, table, 5);
+        i2c_master_send_datas(0x5a, 0x00, uart1_get(), 5);
 		
 		delay_ms(1000); 							//发送停止命令
 		
@@ -107,4 +106,5 @@ void main()
 }
 
 #endif 
+
 */

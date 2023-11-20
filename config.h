@@ -14,4 +14,7 @@ typedef 	unsigned long	u32;
 #define	TRUE	1
 #define	FALSE	0
 
+#define     I2C_P33_P32     0x00
+#define     I2C_P54_P55     0x10
+
 #endif
