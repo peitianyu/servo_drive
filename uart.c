@@ -42,18 +42,20 @@ void print(char *p, ...)
     uart1_send_array(buf, strlen(buf));
 }
 
-static u8 g_rptr[16];
+static u8 g_rptr[10];
 static u8 g_cnt = 0;
+static u8 g_len = 0;
 void uart_isr() interrupt 4
 {
     if(RI) {
         RI = 0;
 
-        if(SBUF == 0xff) {
-            g_cnt = 0;
-            return;
-        }
-
+	if(SBUF == 0xaa && g_rptr[g_cnt-1] == 0xff)
+	{
+		g_len = g_cnt-1;
+            	g_cnt = 0;
+            	return;
+	}
         g_rptr[g_cnt++] = SBUF;
     }
 }
