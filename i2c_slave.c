@@ -3,8 +3,8 @@
 bit g_isda;                                         //设备地址标志
 bit g_isma;                                         //存储地址标志
 u8 g_addr;
-u8 pdata g_rbuf[10];
-u8 pdata g_tbuf[10];
+u8 pdata g_rbuf[5];
+u8 pdata g_tbuf[5];
 void i2c_slave_init(u8 port_id, u8 addr)
 {
     P_SW2 |= 0x80;
@@ -57,6 +57,8 @@ void i2c_isr() interrupt 24
 
     _pop_(P_SW2);
 }
+
+void i2c_set_addr(u8 addr) { I2CSLADR = addr; }
 
 u8* i2c_slave_get(void) { return g_rbuf; }
 

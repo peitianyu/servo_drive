@@ -5,6 +5,8 @@
 
 void i2c_slave_init(u8 port_id, u8 addr);
 
+void i2c_set_addr(u8 addr);
+
 u8* i2c_slave_get(void);
 
 void i2c_slave_set(u8* p, u8 len);

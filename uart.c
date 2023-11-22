@@ -53,11 +53,15 @@ void uart_isr() interrupt 4
 	if(SBUF == 0xaa && g_rptr[g_cnt-1] == 0xff)
 	{
 		g_len = g_cnt-1;
-            	g_cnt = 0;
-            	return;
+		g_cnt = 0;
+		return;
 	}
         g_rptr[g_cnt++] = SBUF;
     }
 }
 
-u8* uart1_get() { return g_rptr; }
+u8 uart1_len(void)	{ return g_len; }
+	
+void uart1_reset_len(void) { g_len = 0; g_cnt = 0;}
+
+u8* uart1_get(void) { return g_rptr; }

@@ -7,6 +7,10 @@ void uart1_init(void);
 
 void uart1_send_array(u8 *p, u8 len);
 
+u8 uart1_len(void);
+	
+void uart1_reset_len(void);
+
 void print(char *p, ...);
 
 u8* uart1_get();

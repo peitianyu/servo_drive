@@ -24,80 +24,94 @@
 //| 设置KD, 保存参数   		| 0x25       	| 微分系数float     | 0x25       	| 0或1[1byte] 	|
 //| 设置转矩, 保存参数   	| 0x26       	| 转矩限制float     | 0x26       	| 0或1[1byte] 	|
 //| 设置初始角度, 保存参数 	| 0x27       	| 初始角度float     | 0x27       	| 0或1[1byte] 	|
-//| 使能/失能舵机      		| 0x55       	| 0或1[1byte]       | 0x55       	| 无			|
+//| 使能/失能舵机      		| 0x28       	| 0或1[1byte]       | 0x28       	| 无			|
 //|---------------------------------------------------------------------------------------------|
-#include "gpio.h"
-#include "delay.h"
-#include "pwm.h"
-#include "timer.h"
-#include "uart.h"
-#include "adc.h"
-#include "os.h"
+//#include "gpio.h"
+//#include "delay.h"
+//#include "pwm.h"
+//#include "timer.h"
+//#include "uart.h"
+//#include "adc.h"
+//#include "os.h"
 
-void led_task(void)
-{
-	gpio_toggle(P54);
-}
+//void led_task(void)
+//{
+//	gpio_toggle(P54);
+//}
 
-void print_adc(void)
-{
-	u16 adc_val = adc_get(5);
-	print("%d\r\n", adc_val);
-}
+//void print_adc(void)
+//{
+//	u16 adc_val = adc_get(5);
+//	print("%d\r\n", adc_val);
+//}
 
-u16 pwm_val = 0.02 * 1024;
-void main()
-{
-	gpio_init(3, 2, GPIO_PullUp);
-	gpio_init(3, 3, GPIO_PullUp);
-	gpio_init(5, 5, GPIO_HighZ);
-	gpio_init(5, 4, GPIO_PullUp);
+//u16 pwm_val = 0.02 * 1024;
+//void main()
+//{
+//	gpio_init(3, 2, GPIO_PullUp);
+//	gpio_init(3, 3, GPIO_PullUp);
+//	gpio_init(5, 5, GPIO_HighZ);
+//	gpio_init(5, 4, GPIO_PullUp);
 
-	timer_init(0, 50000); // 50kHz
-	uart1_init();
-    
-	adc_init();
+//	timer_init(0, 50000); // 50kHz
+//	uart1_init();
+//    
+//	adc_init();
 
-	pwm_10bit_init(0, pwm_val); // 选择定时器0溢出为pwm发生源
+//	pwm_10bit_init(0, pwm_val); // 选择定时器0溢出为pwm发生源
 
-	add_task(0, 0, 1000, led_task);
-	add_task(1, 0, 1, print_adc);
-    
-	while(TRUE)
-    {
-		task_process();
-    }
-}
+//	add_task(0, 0, 1000, led_task);
+//	add_task(1, 0, 1, print_adc);
+//    
+//	while(TRUE)
+//    {
+//		task_process();
+//    }
+//}
 
-
-/*
 
 #include "gpio.h"
 #include "delay.h"
-#include "uart.h"
 #include "config.h"
 
-#if 1
+#if 0
 #include "i2c_master.h"
+#include "uart.h"
 
-u8 p[5];
-u8 cnt = 0;
+u8 g_i2c_addr = 0x5a;
+u16 g_delay_time = 1000;
 void main()
 {
-	gpio_init(3, 2, GPIO_OUT_OD);
-	gpio_init(3, 3, GPIO_OUT_OD);
-
+	gpio_init(3, 2, GPIO_OUT_UP);
+	gpio_init(3, 3, GPIO_OUT_UP);
     i2c_master_init(I2C_P33_P32);
 	uart1_init();
 	
     while (1)
-	{                                 
-        i2c_master_send_datas(0x5a, 0x00, uart1_get(), 5);
+	{    
+		if(uart1_get()[0] == 0x55){
+			g_delay_time = uart1_get()[1] >> 8 + uart1_get()[2];
+			uart1_reset_len();
+			continue;
+		}
 		
-		delay_ms(1000); 							//发送停止命令
+		i2c_master_send_datas(g_i2c_addr, 0x00, uart1_get(), 5);
 		
-		i2c_master_recv(0x5a, 0x00, p, 5);
-		uart1_send_array(p, 5);
+		delay_ms(g_delay_time);
+		
+		uart1_send_array(i2c_master_recv(g_i2c_addr, 0x00, 5), 5);		
+		
+		
+		if(uart1_len())
+		{
+			uart1_reset_len();
+			
+			if(i2c_master_recv(g_i2c_addr, 0x00, 5)[0] == 0x21 && i2c_master_recv(g_i2c_addr, 0x00, 5)[2] == 1)	
+			{
+				g_i2c_addr = i2c_master_recv(g_i2c_addr, 0x00, 5)[1];
+				print("%d\n", g_i2c_addr);
+			}
+		}
     }
 }
 
@@ -107,22 +121,23 @@ void main()
 
 void main()
 {
-    gpio_init(3, 2, GPIO_PullUp);
-	gpio_init(3, 3, GPIO_PullUp);
+    gpio_init(5, 4, GPIO_OUT_UP);
+	gpio_init(5, 5, GPIO_OUT_UP);
 	
-	i2c_slave_init(I2C_P33_P32, 0x5a);
-	
-	uart1_init();
+	i2c_slave_init(I2C_P55_P54, 0x5a);
 
     while(1)
     {
-        delay_ms(1500);
-        uart1_send_array(i2c_slave_get(), 5);
-
-        i2c_slave_set(i2c_slave_get(), 5);
+		i2c_slave_set(i2c_slave_get(), 5);
+        delay_ms(1000);
+		if(i2c_slave_get()[0] == 0x21) {
+			i2c_set_addr(i2c_slave_get()[1]);
+			i2c_slave_get()[2] = 0x01;	
+			i2c_slave_get()[3] = 0xff;	
+			i2c_slave_get()[4] = 0xff;	
+		}
     }
 }
 
 #endif 
 
-*/

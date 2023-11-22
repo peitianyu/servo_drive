@@ -79,9 +79,10 @@ void i2c_master_send_datas(u8 dev_addr, u8 mem_addr, u8 *p, u8 len)
     i2c_stop();
 }
 
-void i2c_master_recv(u8 dev_addr, u8 mem_addr, u8 *p, u8 len)
+u8 g_i2c_recv_dat[5];
+u8* i2c_master_recv(u8 dev_addr, u8 mem_addr, u8 len)
 {
-    i2c_start();
+	i2c_start();
     i2c_send_data(dev_addr);
     i2c_recv_ack();
     i2c_send_data(mem_addr);
@@ -92,12 +93,14 @@ void i2c_master_recv(u8 dev_addr, u8 mem_addr, u8 *p, u8 len)
     i2c_recv_ack();
 
     for(i = 0; i < len; i++){
-        p[i] = i2c_recv_data();
+        g_i2c_recv_dat[i] = i2c_recv_data();
 
         (i == len - 1) ? i2c_send_nak() : i2c_send_ack();
     }
 
     i2c_stop();
+	
+	return g_i2c_recv_dat;
 }
 
 
